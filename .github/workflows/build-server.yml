@@ -1,4 +1,4 @@
-name: Build and Push Multi-arch Docker Image
+name: Make MediaGo Docker Image
 
 on:
   push:
@@ -7,24 +7,25 @@ on:
 
 jobs:
   build:
+    name: Build and Push Docker Image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22.19.0"
 
       - uses: pnpm/action-setup@v3
         with:
-          version: latest
+          version: "10.15.0"
           run_install: true
           standalone: true
 
       - name: Build
-        run: pnpm build:web-release
+        run: pnpm release:server
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -40,9 +41,9 @@ jobs:
           password: ${{ secrets.ALIYUN_PASSWORD }}
 
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./apps/server
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           push: true
           tags: |
